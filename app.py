@@ -10,34 +10,39 @@ import os
 app = Flask(__name__)
 
 def scrape_subito(marka, tip, lokacija, godiste, cena_min, cena_max, kilometraza_max):
-    options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--window-size=1920,1080")
+    try:
+        options = Options()
+        options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--window-size=1920,1080")
 
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
-    query = f"{marka}+{tip}"
-    url = f"https://www.subito.it/annunci-{lokacija}/vendita/moto-scooter/?q={query}&from={godiste}"
-    if cena_min:
-        url += f"&priceMin={cena_min}"
-    if cena_max:
-        url += f"&priceMax={cena_max}"
+        query = f"{marka}+{tip}"
+        url = f"https://www.subito.it/annunci-{lokacija}/vendita/moto-scooter/?q={query}&from={godiste}"
+        if cena_min:
+            url += f"&priceMin={cena_min}"
+        if cena_max:
+            url += f"&priceMax={cena_max}"
 
-    driver.get(url)
-    time.sleep(3)
+        driver.get(url)
+        time.sleep(3)
 
-    oglasi = driver.find_elements(By.CSS_SELECTOR, "a.AdCardAd_cardLink__zU5EX")[:25]
+        oglasi = driver.find_elements(By.CSS_SELECTOR, "a.AdCardAd_cardLink__zU5EX")[:25]
 
-    with open("rezultati.txt", "w", encoding="utf-8") as f:
-        for oglas in oglasi:
-            naslov = oglas.text.strip()
-            link = oglas.get_attribute("href")
-            f.write(f"{naslov}\n{link}\n\n")
+        with open("rezultati.txt", "w", encoding="utf-8") as f:
+            for oglas in oglasi:
+                naslov = oglas.text.strip()
+                link = oglas.get_attribute("href")
+                f.write(f"{naslov}\n{link}\n\n")
 
-    driver.quit()
+        driver.quit()
+    except Exception as e:
+        with open("error_log.txt", "w", encoding="utf-8") as f:
+            f.write(str(e))
+        raise
 
 @app.route("/", methods=["GET", "POST"])
 def index():
