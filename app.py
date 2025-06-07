@@ -2,7 +2,10 @@ from flask import Flask, render_template, request, send_file
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 import time
+import os
 
 app = Flask(__name__)
 
@@ -11,7 +14,10 @@ def scrape_subito(marka, tip, lokacija, godiste, cena_min, cena_max, kilometraza
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    driver = webdriver.Chrome(options=options)
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920,1080")
+
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
     query = f"{marka}+{tip}"
     url = f"https://www.subito.it/annunci-{lokacija}/vendita/moto-scooter/?q={query}&from={godiste}"
@@ -50,8 +56,5 @@ def index():
     return render_template("index.html")
 
 if __name__ == "__main__":
-import os
-
-port = int(os.environ.get("PORT", 5000))
-app.run(host="0.0.0.0", port=port)
-
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
