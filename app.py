@@ -12,19 +12,15 @@ app = Flask(__name__)
 def scrape_subito(marka, tip, lokacija, godiste, cena_min, cena_max, kilometraza_max):
     try:
         options = Options()
+        # Podesi putanju do Brave browser-a
+        options.binary_location = "C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"
+
         options.add_argument("--headless")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-gpu")
         options.add_argument("--window-size=1920,1080")
 
-        # Ovde dodaj putanju do Brave browsera (promeni ako ti je drugačija)
-        # brave_path = "/usr/bin/brave-browser"  # Linux primer
-        brave_path = "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe"  # Windows primer
-
-        options.binary_location = brave_path
-
-        # Pokrećemo webdriver za Chrome, ali sa Brave binary-jem
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
         query = f"{marka}+{tip}"
